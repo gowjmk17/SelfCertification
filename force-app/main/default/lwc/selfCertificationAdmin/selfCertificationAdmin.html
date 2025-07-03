@@ -1,0 +1,83 @@
+
+<template>
+    <lightning-card title="Self Certification Datatable">
+
+        <!-- Toolbar Controls -->
+        <div class="slds-grid slds-grid_align-spread slds-p-around_x-small">
+
+            <!-- Left side: Page size selector and selected records count -->
+            <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-start">
+                <lightning-combobox
+                    label="Rows per page"
+                    value={pageSize}
+                    options={pageSizeOptions}
+                    onchange={handlePageSizeChange}
+                    variant="label-hidden"
+                    class="slds-m-right_small"
+                ></lightning-combobox>
+
+                <div class="slds-text-body_regular">
+                    Selected Records: {selectedCount}/{totalCount}
+                </div>
+            </div>
+
+            
+            <!-- Right side: Search box and refresh -->
+            <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-end">
+                 
+                <lightning-button
+                    label="Export CSV"
+                    icon-name="utility:download"
+                    title="Export to CSV"
+                    onclick={handleTestExport}
+                    class="slds-m-right_small"
+                ></lightning-button>
+                 <div class="slds-form-element slds-m-right_small" style="min-width: 300px;">
+                    <lightning-input
+                        type="search"
+                        placeholder="Search by Country, User ID, or Status"
+                        variant="label-hidden"
+                        value={searchText}
+                        onchange={handleSearch}
+                    ></lightning-input>
+                </div>
+                
+                <lightning-button-icon
+                    icon-name="utility:refresh"
+                    alternative-text="Refresh"
+                    title="Refresh"
+                    onclick={handleRefresh}
+                     class="slds-m-right_small"
+                ></lightning-button-icon>
+            </div>
+        </div>
+
+        <!-- Datatable -->
+              <template if:true={certifications}>
+            <div class="slds-m-top_large">
+                <lightning-card title="Self Certification Datatable">
+                    <div class="custom-datatable" style="width: auto;">
+                            <lightning-datatable
+                                key-field="Id"
+                                data={paginatedData}
+                                columns={certColumns}
+                                show-row-number-column="true"
+                                onrowselection={handleRowSelection}
+                                >
+                            </lightning-datatable>
+                    </div>
+                    <div class="slds-align_absolute-center slds-m-top_medium">
+            <lightning-button label="Previous" onclick={handlePrevious} disabled={isPreviousDisabled}></lightning-button>
+            <span class="slds-m-horizontal_medium">Page {currentPage} of {totalPages}</span>
+            <lightning-button label="Next" onclick={handleNext} disabled={isNextDisabled}></lightning-button>
+        </div>
+                    </lightning-card>
+                </div>
+            </template>
+        <template if:true={error}>
+         <div class="slds-text-color_error">{error.body.message}</div>
+      </template>
+
+    </lightning-card>
+</template>
+
