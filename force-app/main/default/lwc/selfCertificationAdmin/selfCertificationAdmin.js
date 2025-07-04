@@ -1,4 +1,5 @@
 import { LightningElement, wire, track } from 'lwc';
+
 import getCertifications from '@salesforce/apex/SelfCertificationDataTableController.getCertifications';
 
 const columns = [
@@ -29,7 +30,9 @@ export default class SelfCertificationAdmin extends LightningElement {
             this.initialRecords = decorated;
             this.totalPages = Math.ceil(this.certifications.length / parseInt(this.pageSize, 10));
             this.currentPage = 1;
-            this.updatePaginatedData();
+            this.paginatedData = this.certifications.slice(0, parseInt(this.pageSize, 10));
+//            this.updatePaginatedData();
+            
             this.error = undefined;
         } else if (error) {
             this.error = error;
@@ -91,7 +94,7 @@ export default class SelfCertificationAdmin extends LightningElement {
 
         handleRowSelection(event) {
             this.selectedRows = event.detail.selectedRows;
-            console.log('Selected Rows:', this.selectedRows);
+            console.log('Selected Rows:', JSON.parse(JSON.stringify(this.selectedRows)));
         }
 
     handlePageSizeChange(event) {
@@ -110,6 +113,7 @@ export default class SelfCertificationAdmin extends LightningElement {
     const start = (this.currentPage - 1) * parseInt(this.pageSize, 10);
     const end = start + parseInt(this.pageSize, 10);
     this.paginatedData = this.certifications.slice(start, end);
+
 }
 
     handlePrevious() {
@@ -134,42 +138,39 @@ export default class SelfCertificationAdmin extends LightningElement {
         return this.currentPage === this.totalPages;
     }
 
-    handleTestExport() {
-        const exportData = this.paginatedData; // Only export visible rows
-        const testData = exportData.map(record => ({
-            Country__c: record.Country__c || '',
-            Certification_Date__c: record.Certification_Date__c
-                ? new Date(record.Certification_Date__c).toISOString().split('T')[0]
-                : '',
-            Certified_By_Name: record.Certified_By_Name || '',
-            Status__c: record.Status__c || ''
-        }));
+handleTestExport() {
+    const data = this.selectedRows;
+     const cleanData = JSON.parse(JSON.stringify(data));
+    console.log('Selected Rows:', cleanData);    
 
-        let csv = 'Country,Certification Date,Certified By,Status\n';
-        testData.forEach(record => {
-            const row = [
-                `"${record.Country__c}"`,
-                `"${record.Certification_Date__c}"`,
-                `"${record.Certified_By_Name}"`,
-                `"${record.Status__c}"`
-            ];
-            csv += row.join(',') + '\n';
-        });
-
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-
-        const link = document.createElement('a');
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'SelfCertifications.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        if (!data || data.length === 0) {
+        alert('No records selected.');
+        return;
     }
 
+    let csv = 'Country,Certification Date,Certified By,Status\n';
+   cleanData.forEach(row => {
+        const country = row.Country__c || '';
+        const date = row.Certification_Date__c
+            ? new Date(row.Certification_Date__c).toISOString().split('T')[0]
+            : '';
+        const certifiedBy = row.Certified_By_Name || '';
+        const status = row.Status__c || '';
+
+        // Join cells as comma-separated values without surrounding quotes
+        csv += `${country},${date},${certifiedBy},${status}\n`;
+    });
+
+    const encodedUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'TestExport.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
     handleRefresh() {
-        return refreshApex(this.wiredCertifications);
+
     }
 }
 
