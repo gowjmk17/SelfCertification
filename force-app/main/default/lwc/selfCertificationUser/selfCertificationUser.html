@@ -1,32 +1,81 @@
 <template>
-    <lightning-card title="Self-Certification">
-        <div class="slds-p-around_medium">
-                    <!-- Form -->
-            <lightning-input label="User Name" value={userName} disabled></lightning-input>
-            <lightning-input label="Country" value={country} disabled></lightning-input>
-            <lightning-input label="Certification Period" value={certificationPeriod} disabled></lightning-input>
+  <!-- Pricing Card Above -->
 
-            <lightning-textarea label="Comments" value={comments} onchange={handleCommentsChange}></lightning-textarea>
-
-            <lightning-input type="checkbox" label="I confirm the accuracy of this certification." checked={confirmation} onchange={handleConfirmationChange}></lightning-input>
-
-            <lightning-input type="checkbox" label="I agree this serves as my e-signature." checked={eSignature} onchange={handleESignatureChange}></lightning-input>
-
-            <template if:true={recordId}>
-                <p class="slds-text-color_success">Record submitted successfully!</p>
-            </template>
-
-            <lightning-file-upload
-                label="Upload Signed PDF"
-                name="fileUploader"
-                record-id={recordId}
-                accept=".pdf"
-                onuploadfinished={handleUploadFinished}>
-            </lightning-file-upload>
-
-            <div class="slds-m-top_medium">
-                <lightning-button label="Submit" variant="brand" onclick={handleSubmit}></lightning-button>
-            </div>
-        </div>
+  <div class="slds-m-bottom_medium">
+    <lightning-card title="Certification Pricing" class="slds-m-bottom_medium">
+      <div class="slds-p-around_medium">
+        <lightning-layout horizontal-align="start">
+          <lightning-layout-item>
+            <p><strong>Country:</strong> {country}</p>
+          </lightning-layout-item>
+          <lightning-layout-item class="slds-m-left_medium">
+            <p><strong>Price:</strong> {price}</p>
+          </lightning-layout-item>
+        </lightning-layout>
+      </div>
     </lightning-card>
+  </div>
+  <!-- Self-Certification Card -->
+  <div>
+    <lightning-card title="Self-Certification">
+      <div class="slds-p-around_medium">
+        <!-- Form -->
+        <lightning-input
+          label="User Name"
+          value={userName}
+          disabled
+        ></lightning-input>
+        <lightning-input
+          label="Country"
+          value={country}
+          disabled
+        ></lightning-input>
+        <lightning-input
+          label="Certification Period"
+          value={certificationPeriod}
+          disabled
+        ></lightning-input>
+        <lightning-input
+          label="Certification Date"
+          value={certificationDate}
+          disabled
+        ></lightning-input>
+        <lightning-textarea
+          label="Comments"
+          value={comments}
+          onchange={handleCommentsChange}
+        ></lightning-textarea>
+
+        <lightning-input
+          type="checkbox"
+          label="I confirm the accuracy of this certification."
+          checked={confirmation}
+          onchange={handleConfirmationChange}
+        ></lightning-input>
+
+        <lightning-input
+          type="checkbox"
+          label="I agree this serves as my e-signature."
+          checked={eSignature}
+          onchange={handleESignatureChange}
+        ></lightning-input>
+          <lightning-file-upload
+              label="Upload Signed PDF"
+              name="fileUploader"
+              record-id={recordId}
+              accept=".pdf"
+              onuploadfinished={handleUploadFinished}
+            ></lightning-file-upload>
+
+        <div class="slds-m-top_medium">
+          <lightning-button
+            label="Submit"
+            variant="brand"
+            onclick={handleSubmit}
+          ></lightning-button>
+        </div>
+      </div>
+    </lightning-card>
+  </div>
+  
 </template>
