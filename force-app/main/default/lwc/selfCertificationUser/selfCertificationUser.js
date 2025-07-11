@@ -2,7 +2,7 @@ import { LightningElement, track, wire } from 'lwc';
 import getUserInfo from '@salesforce/apex/SelfCertController.getUserInfo';
 import createSelfCertification from '@salesforce/apex/SelfCertController.createSelfCertification';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import getPricingDataByUserCountry from '@salesforce/apex/SelfCertController.getPricingDataByUserCountry';
+import getPricingDataByUserCountry from '@salesforce/apex/SelfCertPriceController.getPricingDataByUserCountry';
 
 export default class SelfCertificationUser extends LightningElement {
     @track showForm = true;
