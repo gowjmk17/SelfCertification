@@ -4,7 +4,14 @@ import getCertifications from '@salesforce/apex/SelfCertificationDataTableContro
 
 const columns = [
     { label: 'Country', fieldName: 'Country__c' },
-    { label: 'Certification Date', fieldName: 'Certification_Date__c', type: 'date' },
+    { label: 'Certification Date', fieldName: 'Certification_Date__c', type: 'date',
+        typeAttributes: {
+            day: '2-digit',  month: 'short', year: 'numeric'}
+        },
+    { label: 'Next Due Date', fieldName: 'Next_Due_Date__c', type: 'date',
+        typeAttributes: {
+            day: '2-digit',  month: 'short', year: 'numeric'}
+        },
     { label: 'Certified By', fieldName: 'Certified_By_Name', type: 'text' },
     { label: 'Status', fieldName: 'Status__c' }
 ];
@@ -17,13 +24,15 @@ export default class SelfCertificationAdmin extends LightningElement {
     @track searchText = '';
     @track error;
     @track selectedRows = [];
-
+    @track noResults = false;
     @track pageSize = '10';
     @track currentPage = 1;
     totalPages = 0;
 
+    
     @wire(getCertifications)
     wiredCertifications({ error, data }) {
+        
         if (data) {
             const decorated = this.decorateData(data);
             this.certifications = decorated;
@@ -49,7 +58,7 @@ export default class SelfCertificationAdmin extends LightningElement {
         }));
     }
 
-    handleSearch(event) {
+    /* handleSearch(event) {
         const searchKey = event.target.value ? event.target.value.toLowerCase() : '';
 
         if (!this.initialRecords) {
@@ -72,7 +81,35 @@ export default class SelfCertificationAdmin extends LightningElement {
         this.totalPages = Math.ceil(this.certifications.length / parseInt(this.pageSize, 10));
         this.currentPage = 1;
         this.updatePaginatedData();
+    } */
+
+
+handleSearch(event) {
+    const searchKey = event.target.value ? event.target.value.toLowerCase() : '';
+
+    if (!this.initialRecords) {
+        this.certifications = [];
+        this.paginatedData = [];
+        return;
     }
+
+    if (searchKey) {
+        this.certifications = this.initialRecords.filter(record => {
+            return (
+                (record.Country__c && record.Country__c.toLowerCase().includes(searchKey)) ||
+                (record.Certified_By_Name && record.Certified_By_Name.toLowerCase().includes(searchKey)) ||
+                (record.Status__c && record.Status__c.toLowerCase().includes(searchKey))
+            );
+        });
+    } else {
+        this.certifications = this.initialRecords;
+    }
+    this.noResults = this.certifications.length === 0 && searchKey.trim().length > 0;
+    this.totalPages = Math.ceil(this.certifications.length / parseInt(this.pageSize, 10));
+    this.currentPage = 1;
+    this.updatePaginatedData();
+}
+
 
     get pageSizeOptions() {
         return [
@@ -80,7 +117,8 @@ export default class SelfCertificationAdmin extends LightningElement {
             { label: '20', value: '20' },
             { label: '30', value: '30' },
             { label: '40', value: '40' },
-            { label: '50', value: '50' }
+            { label: '50', value: '50' },
+            { label: 'All', value: 'all' }
         ];
     }
 
@@ -97,23 +135,34 @@ export default class SelfCertificationAdmin extends LightningElement {
             console.log('Selected Rows:', JSON.parse(JSON.stringify(this.selectedRows)));
         }
 
-    handlePageSizeChange(event) {
-        this.pageSize = event.detail.value;
+   handlePageSizeChange(event) {
+    this.pageSize = event.detail.value;
+    if (this.pageSize === 'all') {
+        this.totalPages = 1;
+        this.currentPage = 1;
+    } else {
         this.totalPages = Math.ceil(this.certifications.length / parseInt(this.pageSize, 10));
         this.currentPage = 1;
-        this.updatePaginatedData();
     }
+    this.updatePaginatedData();
+}
 
-    updatePaginatedData() {
+  updatePaginatedData() {
     if (!this.certifications || this.certifications.length === 0) {
         this.paginatedData = [];
         this.totalPages = 0;
         return;
     }
-    const start = (this.currentPage - 1) * parseInt(this.pageSize, 10);
-    const end = start + parseInt(this.pageSize, 10);
-    this.paginatedData = this.certifications.slice(start, end);
 
+    if (this.pageSize === 'all') {
+        this.paginatedData = this.certifications;
+        this.totalPages = 1;
+    } else {
+        const start = (this.currentPage - 1) * parseInt(this.pageSize, 10);
+        const end = start + parseInt(this.pageSize, 10);
+        this.paginatedData = this.certifications.slice(start, end);
+        this.totalPages = Math.ceil(this.certifications.length / parseInt(this.pageSize, 10));
+    }
 }
 
     handlePrevious() {
@@ -148,17 +197,18 @@ handleTestExport() {
         return;
     }
 
-    let csv = 'Country,Certification Date,Certified By,Status\n';
+    let csv = 'Country,Certification Date,Certified By,Next Due Date,Status\n';
    cleanData.forEach(row => {
         const country = row.Country__c || '';
         const date = row.Certification_Date__c
             ? new Date(row.Certification_Date__c).toISOString().split('T')[0]
             : '';
         const certifiedBy = row.Certified_By_Name || '';
+        const nextDueDate = row.Next_Due_Date__c || '';
         const status = row.Status__c || '';
 
         // Join cells as comma-separated values without surrounding quotes
-        csv += `${country},${date},${certifiedBy},${status}\n`;
+        csv += `${country},${date},${certifiedBy},${nextDueDate},${status}\n`;
     });
 
     const encodedUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
@@ -170,7 +220,7 @@ handleTestExport() {
     document.body.removeChild(link);
 }
     handleRefresh() {
-
+        window.location.reload();
     }
 }
 

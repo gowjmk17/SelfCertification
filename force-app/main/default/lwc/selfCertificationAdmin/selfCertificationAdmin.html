@@ -73,6 +73,11 @@
         </div>
                     </lightning-card>
                 </div>
+            <template if:true={noResults}>
+    <div class="slds-text-color_error slds-text-heading_small slds-m-top_small">
+        Searching result not found...
+    </div>
+</template>
             </template>
         <template if:true={error}>
          <div class="slds-text-color_error">{error.body.message}</div>
