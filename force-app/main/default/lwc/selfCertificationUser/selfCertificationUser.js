@@ -5,6 +5,9 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getPricingDataByUserCountry from '@salesforce/apex/SelfCertController.getPricingDataByUserCountry';
 
 export default class SelfCertificationUser extends LightningElement {
+    @track showForm = true;
+    @track submittedRecord = null;
+    @track submit = true;
     @track userName = '';
     @track country = '';
     @track price = 'N/A';
@@ -117,14 +120,17 @@ export default class SelfCertificationUser extends LightningElement {
                     variant: 'success'
                 })
             );
+       this.showForm = false;     
+       this.submittedRecord = {
+            userName: this.userName,
+            country: this.country,
+            certificationPeriod: this.certificationPeriod,
+            certificationDate: this.certificationDate,
+            comments: this.comments,
+            confirmation: this.confirmation,
+            eSignature: this.eSignature
+        };
 
-            // Optionally reset form
-            this.comments = '';
-            this.confirmation = false;
-            this.eSignature = false;
-            this.uploadedFileId = null;
-            this.uploadedFileUrl = null;
-            this.isUploadDisabled = true;
         })
         .catch(error => {
             console.error(error);
@@ -136,5 +142,22 @@ export default class SelfCertificationUser extends LightningElement {
                 })
             );
         });
+    }
+
+    handleBack() {
+            this.showForm = true;
+            this.submittedRecord = null;
+            
+            // Reset form fields
+            this.comments = '';
+            this.confirmation = false;
+            this.eSignature = false;
+            this.uploadedFileId = null;
+            this.uploadedFileUrl = null;
+            this.isUploadDisabled = true;
+            this.recordId = null;
+
+            
+
     }
 }

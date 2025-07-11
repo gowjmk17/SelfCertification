@@ -1,4 +1,5 @@
 <template>
+<template if:true={showForm}>
   <!-- Pricing Card Above -->
 
   <div class="slds-m-bottom_medium">
@@ -77,5 +78,35 @@
       </div>
     </lightning-card>
   </div>
+</template>
+
+  <template if:true={submittedRecord}>
+    <div class="slds-m-top_medium">
+      <lightning-card title="Submitted Certification Details">
+        <div class="slds-p-around_medium">
+          <p><strong>User Name:</strong> {submittedRecord.userName}</p>
+          <p><strong>Country:</strong> {submittedRecord.country}</p>
+          <p><strong>Certification Period:</strong> {submittedRecord.certificationPeriod}</p>
+          <p><strong>Certification Date:</strong> {submittedRecord.certificationDate}</p>
+          <p><strong>Confirmation:</strong>
+            <template if:true={submittedRecord.confirmation}>Yes</template>
+            <template if:false={submittedRecord.confirmation}>No</template>
+          </p>
+          <p><strong>E-Signature:</strong>
+            <template if:true={submittedRecord.eSignature}>Yes</template>
+            <template if:false={submittedRecord.eSignature}>No</template>
+          </p>
+          <div class="slds-m-top_medium">
+            <lightning-button
+              label="Back"
+              onclick={handleBack}
+            ></lightning-button>
+          </div>
+        </div>
+      </lightning-card>
+    </div>
+  </template>
+
+
   
 </template>
