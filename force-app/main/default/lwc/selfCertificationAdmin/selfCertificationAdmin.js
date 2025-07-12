@@ -58,33 +58,7 @@ export default class SelfCertificationAdmin extends LightningElement {
         }));
     }
 
-    /* handleSearch(event) {
-        const searchKey = event.target.value ? event.target.value.toLowerCase() : '';
-
-        if (!this.initialRecords) {
-            this.certifications = [];
-            this.paginatedData = [];
-            return;
-        }
-
-        if (searchKey) {
-            this.certifications = this.initialRecords.filter(record => {
-                return Object.values(record).some(val => {
-                    const strVal = String(val);
-                    return strVal && strVal.toLowerCase().includes(searchKey);
-                });
-            });
-        } else {
-            this.certifications = this.initialRecords;
-        }
-
-        this.totalPages = Math.ceil(this.certifications.length / parseInt(this.pageSize, 10));
-        this.currentPage = 1;
-        this.updatePaginatedData();
-    } */
-
-
-handleSearch(event) {
+ handleSearch(event) {
     const searchKey = event.target.value ? event.target.value.toLowerCase() : '';
 
     if (!this.initialRecords) {
