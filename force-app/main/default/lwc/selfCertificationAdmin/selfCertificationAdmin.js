@@ -3,17 +3,17 @@ import { LightningElement, wire, track } from 'lwc';
 import getCertifications from '@salesforce/apex/SelfCertificationDataTableController.getCertifications';
 
 const columns = [
-    { label: 'Country', fieldName: 'Country__c' },
+    { label: 'Country', fieldName: 'Country__c', sortable: "true"},
     { label: 'Certification Date', fieldName: 'Certification_Date__c', type: 'date',
         typeAttributes: {
-            day: '2-digit',  month: 'short', year: 'numeric'}
+            day: '2-digit',  month: 'short', year: 'numeric'}, sortable: "true"
         },
     { label: 'Next Due Date', fieldName: 'Next_Due_Date__c', type: 'date',
         typeAttributes: {
-            day: '2-digit',  month: 'short', year: 'numeric'}
-        },
-    { label: 'Certified By', fieldName: 'Certified_By_Name', type: 'text' },
-    { label: 'Status', fieldName: 'Status__c' }
+            day: '2-digit',  month: 'short', year: 'numeric'}, 
+        sortable: "true"},
+    { label: 'Certified By', fieldName: 'Certified_By_Name', type: 'text', sortable: "true" },
+    { label: 'Status', fieldName: 'Status__c', sortable: "true"}
 ];
 
 export default class SelfCertificationAdmin extends LightningElement {
@@ -21,15 +21,20 @@ export default class SelfCertificationAdmin extends LightningElement {
     @track certifications = [];
     @track paginatedData = [];
     @track initialRecords = [];
-    @track searchText = '';
+    
     @track error;
-    @track selectedRows = [];
+    
+    @track searchText = '';
     @track noResults = false;
+    
+    @track selectedRows = [];
     @track pageSize = '10';
     @track currentPage = 1;
     totalPages = 0;
-
     
+    @track sortBy;
+    @track sortDirection;
+
     @wire(getCertifications)
     wiredCertifications({ error, data }) {
         
@@ -104,10 +109,7 @@ export default class SelfCertificationAdmin extends LightningElement {
             return this.paginatedData ? this.paginatedData.length : 0;
         }
 
-        handleRowSelection(event) {
-            this.selectedRows = event.detail.selectedRows;
-            console.log('Selected Rows:', JSON.parse(JSON.stringify(this.selectedRows)));
-        }
+  
 
    handlePageSizeChange(event) {
     this.pageSize = event.detail.value;
@@ -161,18 +163,25 @@ export default class SelfCertificationAdmin extends LightningElement {
         return this.currentPage === this.totalPages;
     }
 
-handleTestExport() {
-    const data = this.selectedRows;
-     const cleanData = JSON.parse(JSON.stringify(data));
-    console.log('Selected Rows:', cleanData);    
 
-        if (!data || data.length === 0) {
+          handleRowSelection(event) {
+          const selected = event.detail.selectedRows;
+    this.selectedRows = selected.map(row => row.Id); // only Ids
+    this.selectedRowData = selected;                 // full rows
+    console.log('Selected Row IDs:', this.selectedRows);
+    console.log('Selected Rows Data:', this.selectedRowData);
+        }
+
+handleTestExport() {
+    const cleanData = this.selectedRowData;
+
+    if (!cleanData || cleanData.length === 0) {
         alert('No records selected.');
         return;
     }
 
     let csv = 'Country,Certification Date,Certified By,Next Due Date,Status\n';
-   cleanData.forEach(row => {
+    cleanData.forEach(row => {
         const country = row.Country__c || '';
         const date = row.Certification_Date__c
             ? new Date(row.Certification_Date__c).toISOString().split('T')[0]
@@ -180,8 +189,6 @@ handleTestExport() {
         const certifiedBy = row.Certified_By_Name || '';
         const nextDueDate = row.Next_Due_Date__c || '';
         const status = row.Status__c || '';
-
-        // Join cells as comma-separated values without surrounding quotes
         csv += `${country},${date},${certifiedBy},${nextDueDate},${status}\n`;
     });
 
@@ -192,8 +199,45 @@ handleTestExport() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    // Clear selection visually
+    this.selectedRows = [];
+    this.selectedRowData = [];
+
+    // Force refresh if needed
+    const tempData = this.paginatedData;
+    this.paginatedData = [];
+    Promise.resolve().then(() => {
+        this.paginatedData = tempData;
+    });
+    
 }
-    handleRefresh() {
+    
+
+doSorting(event) {
+        this.sortBy = event.detail.fieldName;
+        this.sortDirection = event.detail.sortDirection;
+        this.sortData(this.sortBy, this.sortDirection);
+    }
+
+      sortData(fieldname, direction) {
+        let parseData = JSON.parse(JSON.stringify(this.paginatedData));
+        // Return the value stored in the field
+        let keyValue = (a) => {
+            return a[fieldname];
+        };
+        // cheking reverse direction
+        let isReverse = direction === 'asc' ? 1: -1;
+        // sorting data
+        parseData.sort((x, y) => {
+            x = keyValue(x) ? keyValue(x) : ''; // handling null values
+            y = keyValue(y) ? keyValue(y) : ''; // sorting values based on direction
+            return isReverse * ((x > y) - (y > x));
+        });
+        this.paginatedData = parseData;
+    }    
+
+handleRefresh() {
         window.location.reload();
     }
 }

@@ -60,7 +60,11 @@
                                 key-field="Id"
                                 data={paginatedData}
                                 columns={certColumns}
+                                onsort={doSorting}
+                                sorted-by={sortBy}
+                                sorted-direction={sortDirection}
                                 show-row-number-column="true"
+                                selected-rows={selectedRows}
                                 onrowselection={handleRowSelection}
                                 >
                             </lightning-datatable>
