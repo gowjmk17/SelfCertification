@@ -1,0 +1,6 @@
+.nocaret {
+  caret-color: transparent;
+}
+.allow-caret{
+caret-color: auto;
+}

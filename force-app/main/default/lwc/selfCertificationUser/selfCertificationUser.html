@@ -3,6 +3,7 @@
   <!-- Pricing Card Above -->
 
   <div class="slds-m-bottom_medium">
+    <div class="nocaret">
     <lightning-card title="Certification Pricing" class="slds-m-bottom_medium">
       <div class="slds-p-around_medium">
         <lightning-layout horizontal-align="start">
@@ -15,17 +16,20 @@
         </lightning-layout>
       </div>
     </lightning-card>
+    </div>
   </div>
   <!-- Self-Certification Card -->
-  <div>
+  <div class="nocaret">
     <lightning-card title="Self-Certification">
       <div class="slds-p-around_medium">
         <!-- Form -->
+        
         <lightning-input
-          label="User Name"
+        label="User Name"
           value={userName}
           disabled
         ></lightning-input>
+        
         <lightning-input
           label="Country"
           value={country}
